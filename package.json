@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
-    "start": "set \"NODE_ENV=development\" && webpack",
+    "start": "node build/index.js",
+    "start:dev": "set \"NODE_ENV=development\" && webpack",
     "run:dev": "set \"NODE_ENV=development\" && nodemon build/index.js",
     "build": "webpack",
     "test": "jest"
