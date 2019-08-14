@@ -1,5 +1,4 @@
 import dotenv from 'dotenv';
-import path from 'path';
 import cors from 'cors';
 
 import express, { Request, Response } from 'express';
@@ -7,6 +6,7 @@ import express, { Request, Response } from 'express';
 import { MongoClient, ObjectID } from 'mongodb';
 import BodyParser from 'body-parser';
 import createCardRouter from './routes/cards';
+import createMechanicRouter from "./routes/mechanics";
 
 dotenv.config();
 const app = express();
@@ -34,6 +34,7 @@ if (require.main === module) {
       });
 
       app.use('/cards', createCardRouter(dbase));
+      app.use('/mechanics', createMechanicRouter(dbase));
     }
   );
 }
