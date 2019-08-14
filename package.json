@@ -19,7 +19,7 @@
     "mongodb": "^3.3.0",
     "uuid": "^3.3.2"
   },
-  "homepage": "https://BJennWare.github.io/magic-collection-middleware",
+  "homepage": "https://github.com/BJennWare/magic-collection-middleware",
   "devDependencies": {
     "@babel/cli": "^7.5.5",
     "@babel/core": "^7.5.5",
