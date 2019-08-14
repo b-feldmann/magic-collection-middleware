@@ -46,6 +46,8 @@ const createCardRouter = dbase => {
   });
 
   cardRouter.post('/', (req, res, next) => {
+    if (req.body.accessKey !== process.env.ACCESS_KEY) return;
+
     const newCard = req.body.card ? removeUuid(req.body.card) : EMPTY_CARD();
     dbase.collection(COLLECTION_CARDS).insertOne(newCard, (err, result) => {
       if (err) {
@@ -59,6 +61,8 @@ const createCardRouter = dbase => {
   });
 
   cardRouter.put('/', (req, res, next) => {
+    if (req.body.accessKey !== process.env.ACCESS_KEY) return;
+
     const { uuid, ...card } = req.body.card;
 
     dbase
