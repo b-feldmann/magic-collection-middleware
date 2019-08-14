@@ -15,13 +15,7 @@ const { PORT = 8080 } = process.env;
 app.use(cors());
 app.use(BodyParser.json());
 app.use(BodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.get('/', (req: Request, res: Response) => {
-  res.send({
-    message: 'Welcome to the Magic FunSet Api :)'
-  });
-});
+app.use(express.static('public'));
 
 if (require.main === module) {
   // true if file is executed
