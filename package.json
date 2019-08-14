@@ -1,7 +1,7 @@
 {
   "name": "magic-collection-middleware",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0",
+  "main": "build/index.js",
   "scripts": {
     "start": "set \"NODE_ENV=development\" && webpack",
     "run:dev": "set \"NODE_ENV=development\" && nodemon build/index.js",

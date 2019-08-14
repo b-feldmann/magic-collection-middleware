@@ -19,7 +19,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req: Request, res: Response) => {
   res.send({
-    message: 'hello world'
+    message: 'Welcome to the Magic FunSet Api :)'
   });
 });
 
