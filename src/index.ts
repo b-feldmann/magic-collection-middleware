@@ -10,7 +10,7 @@ import createCardRouter from './routes/cards';
 
 dotenv.config();
 const app = express();
-const { PORT = 3001 } = process.env;
+const { PORT = 8080 } = process.env;
 
 app.use(cors());
 app.use(BodyParser.json());
