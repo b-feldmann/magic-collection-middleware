@@ -1,9 +1,8 @@
-import * as moment from 'moment';
 import CardFaceInterface from './CardFaceInterface';
 import { CardVersion, RarityType } from './enums';
 
 export default interface CardInterface {
-  [key: string]: number | string | CardFaceInterface | boolean | undefined | moment.Moment;
+  [key: string]: number | string | CardFaceInterface | boolean | undefined;
   uuid?: string;
   name: string;
   rarity: RarityType;
@@ -12,5 +11,5 @@ export default interface CardInterface {
   front: CardFaceInterface;
   back?: CardFaceInterface;
   version: CardVersion;
-  lastUpdated: moment.Moment;
+  lastUpdated: number;
 }
