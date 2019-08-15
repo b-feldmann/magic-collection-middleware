@@ -7,6 +7,7 @@ import { MongoClient, ObjectID } from 'mongodb';
 import BodyParser from 'body-parser';
 import createCardRouter from './routes/cards';
 import createMechanicRouter from './routes/mechanics';
+import createAnnotationsRouter from './routes/annotations';
 
 dotenv.config();
 const app = express();
@@ -35,6 +36,7 @@ if (require.main === module) {
 
       app.use('/cards', createCardRouter(dbase));
       app.use('/mechanics', createMechanicRouter(dbase));
+      app.use('/annotations', createAnnotationsRouter(dbase));
     }
   );
 }
