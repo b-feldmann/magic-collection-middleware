@@ -7,7 +7,8 @@
     "start:dev": "set \"NODE_ENV=development\" && webpack",
     "run:dev": "set \"NODE_ENV=development\" && nodemon build/index.js",
     "build": "webpack",
-    "build:webapp": "cd magic-collection-renderer && git pull && yarn && yarn build && cd ../ && rmkdir /s build && xcopy magic-collection-renderer/build .",
+    "build:webapp": "cd magic-collection-renderer && git pull && set \"SKIP_PREFLIGHT_CHECK=true\" && yarn && yarn build && cd ../",
+    "build:webapp:copy": "robocopy \"magic-collection-renderer/build\" \"public/\" /s",
     "test": "jest"
   },
   "dependencies": {
