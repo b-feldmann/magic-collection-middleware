@@ -6,7 +6,7 @@ import express, { Request, Response } from 'express';
 import { MongoClient, ObjectID } from 'mongodb';
 import BodyParser from 'body-parser';
 import createCardRouter from './routes/cards';
-import createMechanicRouter from "./routes/mechanics";
+import createMechanicRouter from './routes/mechanics';
 
 dotenv.config();
 const app = express();
