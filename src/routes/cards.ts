@@ -21,7 +21,8 @@ const EMPTY_CARD = (): CardInterface => ({
   rarity: RarityType.Common,
   creator: Creators.UNKNOWN,
   version: CardVersion.V1,
-  lastUpdated: moment().valueOf()
+  lastUpdated: moment().valueOf(),
+  createdAt: moment().valueOf()
 });
 
 const removeUuid = card => {
@@ -52,6 +53,7 @@ const createCardRouter = dbase => {
     if (req.body.accessKey !== process.env.ACCESS_KEY) return;
 
     const newCard = req.body.card ? removeUuid(req.body.card) : EMPTY_CARD();
+    newCard.createdAt = moment().valueOf();
     newCard.lastUpdated = moment().valueOf();
     dbase.collection(COLLECTION_CARDS).insertOne(newCard, (err, result) => {
       if (err) {

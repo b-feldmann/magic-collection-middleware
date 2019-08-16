@@ -12,4 +12,5 @@ export default interface CardInterface {
   back?: CardFaceInterface;
   version: CardVersion;
   lastUpdated: number;
+  createdAt: number;
 }
