@@ -33,7 +33,8 @@ const createAnnotationsRouter = dbase => {
       content: req.body.content,
       author: req.body.author,
       cardReference: req.body.cardReference,
-      datetime: moment()
+      datetime: moment().valueOf(),
+      edited: false
     };
 
     dbase.collection(COLLECTION_ANNOTATIONS).insertOne(annotation, (err, result) => {
@@ -51,13 +52,18 @@ const createAnnotationsRouter = dbase => {
 
     dbase
       .collection(COLLECTION_ANNOTATIONS)
-      .replaceOne({ _id: ObjectID(uuid) }, { ...annotation }, { upsert: true }, (err, result) => {
-        if (err) {
-          throw err;
-        }
+      .replaceOne(
+        { _id: ObjectID(uuid) },
+        { ...annotation, edited: true },
+        { upsert: true },
+        (err, result) => {
+          if (err) {
+            throw err;
+          }
 
-        res.send({ annotation: { ...annotation, uuid } });
-      });
+          res.send({ annotation: { ...annotation, uuid, edited: true } });
+        }
+      );
   });
 
   return annotationRouter;
