@@ -1,9 +1,6 @@
 import { ObjectID } from 'mongodb';
 
 import express from 'express';
-
-import CardInterface from '../interfaces/CardInterface';
-import { CardMainType, CardVersion, Creators, RarityType } from '../interfaces/enums';
 import MechanicInterface from '../interfaces/MechanicInterface';
 
 const mechanicRouter = express.Router();
@@ -13,11 +10,6 @@ const EMPTY_MECHANIC = (): MechanicInterface => ({
   name: '',
   description: ''
 });
-
-const removeUuid = card => {
-  const { uuid, ...rest } = card;
-  return { ...rest };
-};
 
 const idToUuid = mechanic => {
   const { _id, ...rest } = mechanic;

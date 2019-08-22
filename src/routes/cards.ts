@@ -3,7 +3,7 @@ import { ObjectID } from 'mongodb';
 import express from 'express';
 
 import CardInterface from '../interfaces/CardInterface';
-import { CardMainType, CardVersion, Creators, RarityType } from '../interfaces/enums';
+import { CardMainType, CardState, RarityType } from '../interfaces/enums';
 
 import moment = require('moment');
 
@@ -19,10 +19,14 @@ const EMPTY_CARD = (): CardInterface => ({
   },
   manaCost: '',
   rarity: RarityType.Common,
-  creator: Creators.UNKNOWN,
-  version: CardVersion.V1,
-  lastUpdated: moment().valueOf(),
-  createdAt: moment().valueOf()
+  meta: {
+    comment: '',
+    likes: [],
+    dislikes: [],
+    lastUpdated: moment().valueOf(),
+    createdAt: moment().valueOf(),
+    state: CardState.Draft
+  }
 });
 
 const removeUuid = card => {
@@ -52,9 +56,8 @@ const createCardRouter = dbase => {
   cardRouter.post('/', (req, res, next) => {
     if (req.body.accessKey !== process.env.ACCESS_KEY) return;
 
-    const newCard = req.body.card ? removeUuid(req.body.card) : EMPTY_CARD();
-    newCard.createdAt = moment().valueOf();
-    newCard.lastUpdated = moment().valueOf();
+    const newCard = EMPTY_CARD();
+    newCard.creator = req.body.creator;
     dbase.collection(COLLECTION_CARDS).insertOne(newCard, (err, result) => {
       if (err) {
         throw err;
@@ -70,7 +73,7 @@ const createCardRouter = dbase => {
     if (req.body.accessKey !== process.env.ACCESS_KEY) return;
 
     const { uuid, ...card } = req.body.card;
-    card.lastUpdated = moment().valueOf();
+    card.meta.lastUpdated = moment().valueOf();
 
     dbase
       .collection(COLLECTION_CARDS)

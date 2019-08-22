@@ -58,7 +58,8 @@ export enum Creators {
   Kant = 'Kantiger als Kant'
 }
 
-export enum CardVersion {
-  V1 = 'v1',
-  V2 = 'v2'
+export enum CardState {
+  Draft = 'Draft',
+  Rate = 'Rate',
+  Approved = 'Approved'
 }
