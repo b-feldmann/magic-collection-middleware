@@ -11,6 +11,11 @@ const idToUuid = user => {
 
 const createUserRouter = dbase => {
   userRouter.get('/', function(req, res) {
+    if (req.query.accessKey !== process.env.ACCESS_KEY) {
+      res.sendStatus(401);
+      return;
+    }
+
     dbase
       .collection(COLLECTION_USER)
       .find()
