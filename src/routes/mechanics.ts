@@ -18,6 +18,11 @@ const idToUuid = mechanic => {
 
 const createMechanicRouter = dbase => {
   mechanicRouter.get('/', function(req, res) {
+    if (req.query.accessKey !== process.env.ACCESS_KEY) {
+      res.sendStatus(401);
+      return;
+    }
+
     dbase
       .collection(COLLECTION_MECHANICS)
       .find()
@@ -31,7 +36,10 @@ const createMechanicRouter = dbase => {
   });
 
   mechanicRouter.post('/', (req, res, next) => {
-    if (req.body.accessKey !== process.env.ACCESS_KEY) return;
+    if (req.body.accessKey !== process.env.ACCESS_KEY) {
+      res.sendStatus(401);
+      return;
+    }
 
     dbase.collection(COLLECTION_MECHANICS).insertOne(EMPTY_MECHANIC(), (err, result) => {
       if (err) {
@@ -42,7 +50,10 @@ const createMechanicRouter = dbase => {
   });
 
   mechanicRouter.put('/', (req, res, next) => {
-    if (req.body.accessKey !== process.env.ACCESS_KEY) return;
+    if (req.body.accessKey !== process.env.ACCESS_KEY) {
+      res.sendStatus(401);
+      return;
+    }
 
     const { uuid, ...mechanic } = req.body.mechanic;
 

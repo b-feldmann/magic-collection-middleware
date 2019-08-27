@@ -29,13 +29,13 @@ const EMPTY_CARD = (): CardInterface => ({
   }
 });
 
-const removeUuid = card => {
-  const { uuid, ...rest } = card;
-  return { ...rest };
-};
-
 const createCardRouter = dbase => {
   cardRouter.get('/', function(req, res) {
+    if (req.query.accessKey !== process.env.ACCESS_KEY) {
+      res.sendStatus(401);
+      return;
+    }
+
     dbase
       .collection(COLLECTION_CARDS)
       .find()
@@ -54,7 +54,10 @@ const createCardRouter = dbase => {
   });
 
   cardRouter.post('/', (req, res, next) => {
-    if (req.body.accessKey !== process.env.ACCESS_KEY) return;
+    if (req.body.accessKey !== process.env.ACCESS_KEY) {
+      res.sendStatus(401);
+      return;
+    }
 
     const newCard = EMPTY_CARD();
     newCard.creator = req.body.creator;
@@ -70,7 +73,10 @@ const createCardRouter = dbase => {
   });
 
   cardRouter.put('/', (req, res, next) => {
-    if (req.body.accessKey !== process.env.ACCESS_KEY) return;
+    if (req.body.accessKey !== process.env.ACCESS_KEY) {
+      res.sendStatus(401);
+      return;
+    }
 
     const { uuid, ...card } = req.body.card;
     card.meta.lastUpdated = moment().valueOf();

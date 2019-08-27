@@ -14,6 +14,11 @@ const idToUuid = mechanic => {
 
 const createAnnotationsRouter = dbase => {
   annotationRouter.get('/', function(req, res) {
+    if (req.query.accessKey !== process.env.ACCESS_KEY) {
+      res.sendStatus(401);
+      return;
+    }
+
     dbase
       .collection(COLLECTION_ANNOTATIONS)
       .find()
@@ -27,7 +32,10 @@ const createAnnotationsRouter = dbase => {
   });
 
   annotationRouter.post('/', (req, res, next) => {
-    if (req.body.accessKey !== process.env.ACCESS_KEY) return;
+    if (req.body.accessKey !== process.env.ACCESS_KEY) {
+      res.sendStatus(401);
+      return;
+    }
 
     const annotation = {
       content: req.body.content,
@@ -46,7 +54,10 @@ const createAnnotationsRouter = dbase => {
   });
 
   annotationRouter.put('/', (req, res, next) => {
-    if (req.body.accessKey !== process.env.ACCESS_KEY) return;
+    if (req.body.accessKey !== process.env.ACCESS_KEY) {
+      res.sendStatus(401);
+      return;
+    }
 
     const { uuid, ...annotation } = req.body.annotation;
 
