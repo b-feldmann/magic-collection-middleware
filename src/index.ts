@@ -8,7 +8,8 @@ import BodyParser from 'body-parser';
 import createCardRouter from './routes/cards';
 import createMechanicRouter from './routes/mechanics';
 import createAnnotationsRouter from './routes/annotations';
-import createUserRouter from "./routes/user";
+import createUserRouter from './routes/user';
+import createImagesRouter from "./routes/images";
 
 dotenv.config();
 const app = express();
@@ -19,13 +20,15 @@ app.use(BodyParser.json());
 app.use(BodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
+const databaseName = process.env.NODE_ENV === 'development' ? 'mtg-funset-test' : 'mtg-funset';
+
 if (require.main === module) {
   // true if file is executed
 
   MongoClient.connect(
     `mongodb+srv://${process.env.API_MONGO_USER}:${process.env.API_MONGO_PASS}@${process.env.API_MONGO_ENDPOINT}/test?retryWrites=true&w=majority`,
     (connectErr, db) => {
-      const dbase = db.db('mtg-funset');
+      const dbase = db.db(databaseName);
       if (connectErr) {
         console.log(connectErr);
         return;
@@ -39,6 +42,7 @@ if (require.main === module) {
       app.use('/mechanics', createMechanicRouter(dbase));
       app.use('/annotations', createAnnotationsRouter(dbase));
       app.use('/user', createUserRouter(dbase));
+      app.use('/images', createImagesRouter(dbase));
     }
   );
 }

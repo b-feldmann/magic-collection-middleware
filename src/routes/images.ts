@@ -1,8 +1,6 @@
 import { ObjectID } from 'mongodb';
 
 import express from 'express';
-import moment from 'moment';
-import CardInterface from '../interfaces/CardInterface';
 
 const imagesRouter = express.Router();
 
@@ -17,19 +15,21 @@ const createImagesRouter = dbase => {
 
     dbase
       .collection(COLLECTION)
-      .find()
-      .toArray((err, results) => {
-        if (err) {
-          throw err;
+      .findOne(
+        { $and: [{ cardUuid: req.query.cardUuid }, { face: parseInt(req.query.face, 10) }] },
+        (err, result) => {
+          if (err) {
+            throw err;
+          }
+
+          if (!result) {
+            res.send();
+            return;
+          }
+
+          res.send({ base64: result.base64 });
         }
-
-        const returnedCards = results.map(single => {
-          const { _id, ...image }: { image: string; _id: string } = single;
-          return { ...image, uuid: _id };
-        });
-
-        res.send({ cards: returnedCards });
-      });
+      );
   });
 
   imagesRouter.post('/', (req, res, next) => {
@@ -38,33 +38,22 @@ const createImagesRouter = dbase => {
       return;
     }
 
-    dbase.collection(COLLECTION).insertOne(req.body.image, (err, result) => {
-      if (err) {
-        throw err;
-      }
-
-      const { _id, ...card }: { card: CardInterface; _id: string } = result.ops[0];
-      const createdCard = { ...card, uuid: _id };
-      res.send({ card: createdCard });
-    });
-  });
-
-  imagesRouter.put('/', (req, res, next) => {
-    if (req.body.accessKey !== process.env.ACCESS_KEY) {
-      res.sendStatus(401);
-      return;
-    }
-
-    const { uuid, ...image } = req.body.card;
+    const { base64, cardUuid, face } = req.body;
 
     dbase
       .collection(COLLECTION)
-      .replaceOne({ _id: ObjectID(uuid) }, { ...image }, { upsert: true }, (err, result) => {
+      .removeOne({ $and: [{ cardUuid }, { face: parseInt(face, 10) }] }, (err, result) => {
         if (err) {
           throw err;
         }
 
-        res.send({ card: { ...image, uuid } });
+        dbase.collection(COLLECTION).insertOne({ base64, cardUuid, face }, (err, result) => {
+          if (err) {
+            throw err;
+          }
+
+          res.send();
+        });
       });
   });
 
