@@ -49,10 +49,6 @@ if (require.main === module) {
       app.use('/images', createImagesRouter(dbase));
 
       app.use('/decks', createDeckRouter(dbaseDeckBuilder));
-
-      app.get('/*', (req, res) => {
-        res.sendFile(path.resolve(__dirname, '..', 'public', 'index.html'));
-      });
     }
   );
 }
