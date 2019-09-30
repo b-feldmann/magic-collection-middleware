@@ -5,12 +5,13 @@ import express, { Request, Response } from 'express';
 
 import { MongoClient, ObjectID } from 'mongodb';
 import BodyParser from 'body-parser';
+import * as path from 'path';
 import createCardRouter from './routes/cards';
 import createMechanicRouter from './routes/mechanics';
 import createAnnotationsRouter from './routes/annotations';
 import createUserRouter from './routes/user';
-import createImagesRouter from "./routes/images";
-import createDeckRouter from "./routes/decks";
+import createImagesRouter from './routes/images';
+import createDeckRouter from './routes/decks';
 
 dotenv.config();
 const app = express();
@@ -48,6 +49,10 @@ if (require.main === module) {
       app.use('/images', createImagesRouter(dbase));
 
       app.use('/decks', createDeckRouter(dbaseDeckBuilder));
+
+      app.get('/*', (req, res) => {
+        res.sendFile(path.join(__dirname, '..', 'build', 'index.html'));
+      });
     }
   );
 }
