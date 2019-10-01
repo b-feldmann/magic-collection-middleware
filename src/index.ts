@@ -51,8 +51,8 @@ if (require.main === module) {
       app.use('/decks', createDeckRouter(dbaseDeckBuilder));
 
       app.get('*', (req, res) =>{
-        // res.sendFile(path.join(`${__dirname}/public/index.html`));
-        res.send('foo');
+        res.sendFile('public/index.html');
+        // res.send('foo');
       });
     }
   );
