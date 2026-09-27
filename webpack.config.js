@@ -1,13 +1,8 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const nodeExternals = require('webpack-node-externals');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const WebpackShellPlugin = require('webpack-shell-plugin');
 
 const { NODE_ENV = 'production' } = process.env;
 module.exports = {
-  watch: NODE_ENV === 'development',
   entry: './src/index.ts',
   mode: NODE_ENV,
   target: 'node',
@@ -27,12 +22,7 @@ module.exports = {
       }
     ]
   },
-  plugins:
-    NODE_ENV === 'development'
-      ? [
-          new WebpackShellPlugin({
-            onBuildEnd: ['yarn run:dev']
-          })
-        ]
-      : []
+  watchOptions: {
+    ignored: /node_modules/
+  }
 };

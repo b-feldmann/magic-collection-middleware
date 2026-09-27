@@ -1,11 +1,8 @@
-import { ObjectID } from 'mongodb';
-
+import { ObjectId } from 'mongodb';
 import express from 'express';
 
 import CardInterface from '../interfaces/CardInterface';
 import { CardMainType, CardState, RarityType } from '../interfaces/enums';
-
-import moment = require('moment');
 
 const cardRouter = express.Router();
 
@@ -15,7 +12,7 @@ const EMPTY_CARD = (): CardInterface => ({
   front: {
     name: '',
     cardMainType: CardMainType.Creature,
-    cardText: []
+    cardText: [],
   },
   manaCost: '',
   rarity: RarityType.Common,
@@ -23,73 +20,71 @@ const EMPTY_CARD = (): CardInterface => ({
     comment: '',
     likes: [],
     dislikes: [],
-    lastUpdated: moment().valueOf(),
-    createdAt: moment().valueOf(),
-    state: CardState.Draft
-  }
+    lastUpdated: Date.now(),
+    createdAt: Date.now(),
+    state: CardState.Draft,
+  },
 });
 
-const createCardRouter = dbase => {
-  cardRouter.get('/', function(req, res) {
+const createCardRouter = (dbase) => {
+  cardRouter.get('/', async (req, res) => {
     if (req.query.accessKey !== process.env.ACCESS_KEY) {
       res.sendStatus(401);
       return;
     }
 
-    dbase
-      .collection(COLLECTION_CARDS)
-      .find()
-      .toArray((err, results) => {
-        if (err) {
-          throw err;
-        }
+    try {
+      const results = await dbase.collection(COLLECTION_CARDS).find().toArray();
 
-        const returnedCards = results.map(single => {
-          const { _id, ...card }: { card: CardInterface; _id: string } = single;
-          return { ...card, uuid: _id };
-        });
-
-        res.send({ cards: returnedCards });
+      const returnedCards = results.map((single) => {
+        const { _id, ...card }: { card: CardInterface; _id: string } = single;
+        return { ...card, uuid: _id };
       });
+
+      res.send({ cards: returnedCards });
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+    }
   });
 
-  cardRouter.post('/', (req, res, next) => {
+  cardRouter.post('/', async (req, res) => {
     if (req.body.accessKey !== process.env.ACCESS_KEY) {
       res.sendStatus(401);
       return;
     }
 
-    const newCard = EMPTY_CARD();
-    newCard.creator = req.body.creator;
-    dbase.collection(COLLECTION_CARDS).insertOne(newCard, (err, result) => {
-      if (err) {
-        throw err;
-      }
-
-      const { _id, ...card }: { card: CardInterface; _id: string } = result.ops[0];
-      const createdCard = { ...card, uuid: _id };
+    try {
+      const newCard = EMPTY_CARD();
+      newCard.creator = req.body.creator;
+      const result = await dbase.collection(COLLECTION_CARDS).insertOne(newCard);
+      const createdCard = { ...newCard, uuid: result.insertedId };
       res.send({ card: createdCard });
-    });
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+    }
   });
 
-  cardRouter.put('/', (req, res, next) => {
+  cardRouter.put('/', async (req, res) => {
     if (req.body.accessKey !== process.env.ACCESS_KEY) {
       res.sendStatus(401);
       return;
     }
 
-    const { uuid, ...card } = req.body.card;
-    card.meta.lastUpdated = moment().valueOf();
+    try {
+      const { uuid, ...card } = req.body.card;
+      card.meta.lastUpdated = Date.now();
 
-    dbase
-      .collection(COLLECTION_CARDS)
-      .replaceOne({ _id: ObjectID(uuid) }, { ...card }, { upsert: true }, (err, result) => {
-        if (err) {
-          throw err;
-        }
+      await dbase
+        .collection(COLLECTION_CARDS)
+        .replaceOne({ _id: new ObjectId(uuid) }, { ...card }, { upsert: true });
 
-        res.send({ card: { ...card, uuid } });
-      });
+      res.send({ card: { ...card, uuid } });
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+    }
   });
 
   return cardRouter;

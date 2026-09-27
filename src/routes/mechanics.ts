@@ -1,4 +1,4 @@
-import { ObjectID } from 'mongodb';
+import { ObjectId } from 'mongodb';
 
 import express from 'express';
 import MechanicInterface from '../interfaces/MechanicInterface';
@@ -8,64 +8,65 @@ const mechanicRouter = express.Router();
 const COLLECTION_MECHANICS = 'mechanics';
 const EMPTY_MECHANIC = (): MechanicInterface => ({
   name: '',
-  description: ''
+  description: '',
 });
 
-const idToUuid = mechanic => {
+const idToUuid = (mechanic) => {
   const { _id, ...rest } = mechanic;
   return { ...rest, uuid: _id };
 };
 
-const createMechanicRouter = dbase => {
-  mechanicRouter.get('/', function(req, res) {
+const createMechanicRouter = (dbase) => {
+  mechanicRouter.get('/', async (req, res) => {
     if (req.query.accessKey !== process.env.ACCESS_KEY) {
       res.sendStatus(401);
       return;
     }
 
-    dbase
-      .collection(COLLECTION_MECHANICS)
-      .find()
-      .toArray((err, results) => {
-        if (err) {
-          throw err;
-        }
+    try {
+      const results = await dbase.collection(COLLECTION_MECHANICS).find().toArray();
 
-        res.send({ mechanics: results.map(mechanic => idToUuid(mechanic)) });
-      });
+      res.send({ mechanics: results.map((mechanic) => idToUuid(mechanic)) });
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+    }
   });
 
-  mechanicRouter.post('/', (req, res, next) => {
+  mechanicRouter.post('/', async (req, res) => {
     if (req.body.accessKey !== process.env.ACCESS_KEY) {
       res.sendStatus(401);
       return;
     }
 
-    dbase.collection(COLLECTION_MECHANICS).insertOne(EMPTY_MECHANIC(), (err, result) => {
-      if (err) {
-        throw err;
-      }
-      res.send({ mechanic: idToUuid(result.ops[0]) });
-    });
+    try {
+      const mechanic = EMPTY_MECHANIC();
+      const result = await dbase.collection(COLLECTION_MECHANICS).insertOne(mechanic);
+      res.send({ mechanic: { ...mechanic, uuid: result.insertedId } });
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+    }
   });
 
-  mechanicRouter.put('/', (req, res, next) => {
+  mechanicRouter.put('/', async (req, res) => {
     if (req.body.accessKey !== process.env.ACCESS_KEY) {
       res.sendStatus(401);
       return;
     }
 
-    const { uuid, ...mechanic } = req.body.mechanic;
+    try {
+      const { uuid, ...mechanic } = req.body.mechanic;
 
-    dbase
-      .collection(COLLECTION_MECHANICS)
-      .replaceOne({ _id: ObjectID(uuid) }, { ...mechanic }, { upsert: true }, (err, result) => {
-        if (err) {
-          throw err;
-        }
+      await dbase
+        .collection(COLLECTION_MECHANICS)
+        .replaceOne({ _id: new ObjectId(uuid) }, { ...mechanic }, { upsert: true });
 
-        res.send({ mechanic: { ...mechanic, uuid } });
-      });
+      res.send({ mechanic: { ...mechanic, uuid } });
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+    }
   });
 
   return mechanicRouter;

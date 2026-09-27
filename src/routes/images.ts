@@ -1,60 +1,53 @@
-import { ObjectID } from 'mongodb';
-
 import express from 'express';
 
 const imagesRouter = express.Router();
 
 const COLLECTION = 'images';
 
-const createImagesRouter = dbase => {
-  imagesRouter.get('/', function(req, res) {
+const createImagesRouter = (dbase) => {
+  imagesRouter.get('/', async (req, res) => {
     if (req.query.accessKey !== process.env.ACCESS_KEY) {
       res.sendStatus(401);
       return;
     }
 
-    dbase
-      .collection(COLLECTION)
-      .findOne(
-        { $and: [{ cardUuid: req.query.cardUuid }, { face: parseInt(req.query.face, 10) }] },
-        (err, result) => {
-          if (err) {
-            throw err;
-          }
+    try {
+      const result = await dbase.collection(COLLECTION).findOne({
+        $and: [{ cardUuid: req.query.cardUuid }, { face: parseInt(String(req.query.face), 10) }],
+      });
 
-          if (!result) {
-            res.send();
-            return;
-          }
+      if (!result) {
+        res.send();
+        return;
+      }
 
-          res.send({ base64: result.base64 });
-        }
-      );
+      res.send({ base64: result.base64 });
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+    }
   });
 
-  imagesRouter.post('/', (req, res, next) => {
+  imagesRouter.post('/', async (req, res) => {
     if (req.body.accessKey !== process.env.ACCESS_KEY) {
       res.sendStatus(401);
       return;
     }
 
-    const { base64, cardUuid, face } = req.body;
+    try {
+      const { base64, cardUuid, face } = req.body;
 
-    dbase
-      .collection(COLLECTION)
-      .removeOne({ $and: [{ cardUuid }, { face: parseInt(face, 10) }] }, (err, result) => {
-        if (err) {
-          throw err;
-        }
-
-        dbase.collection(COLLECTION).insertOne({ base64, cardUuid, face }, (err, result) => {
-          if (err) {
-            throw err;
-          }
-
-          res.send();
-        });
+      await dbase.collection(COLLECTION).deleteOne({
+        $and: [{ cardUuid }, { face: parseInt(face, 10) }],
       });
+
+      await dbase.collection(COLLECTION).insertOne({ base64, cardUuid, face });
+
+      res.send();
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+    }
   });
 
   return imagesRouter;

@@ -1,72 +1,83 @@
 import express from 'express';
-import { ObjectID } from 'mongodb';
+import { ObjectId } from 'mongodb';
 
 const deckRouter = express.Router();
 
 const COLLECTION_NAME = 'decks';
 
-const idToUuid = user => {
+const idToUuid = (user) => {
   const { _id, ...rest } = user;
   return { ...rest, uuid: _id };
 };
 
-const createDeckRouter = dbase => {
-  deckRouter.get('/all', function(req, res) {
-    dbase
-      .collection(COLLECTION_NAME)
-      .find({ hash: req.query.hash })
-      .toArray((err, results) => {
-        if (err) {
-          throw err;
-        }
+const createDeckRouter = (dbase) => {
+  deckRouter.get('/all', async (req, res) => {
+    try {
+      const results = await dbase
+        .collection(COLLECTION_NAME)
+        .find({ hash: req.query.hash })
+        .toArray();
 
-        res.send({
-          decks: results.map(singleDeck => ({
-            name: singleDeck.name,
-            uuid: singleDeck._id,
-            cover: singleDeck.cover,
-            commander: singleDeck.commander
-          }))
-        });
+      res.send({
+        decks: results.map((singleDeck) => ({
+          name: singleDeck.name,
+          uuid: singleDeck._id,
+          cover: singleDeck.cover,
+          commander: singleDeck.commander,
+        })),
       });
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+    }
   });
 
-  deckRouter.get('/', function(req, res) {
-    dbase.collection(COLLECTION_NAME).findOne({ _id: ObjectID(req.query.uuid) }, (err, result) => {
-      if (err) {
-        throw err;
+  deckRouter.get('/', async (req, res) => {
+    try {
+      const result = await dbase
+        .collection(COLLECTION_NAME)
+        .findOne({ _id: new ObjectId(String(req.query.uuid)) });
+
+      if (!result) {
+        res.send();
+        return;
       }
 
       res.send({ deck: idToUuid(result) });
-    });
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+    }
   });
 
-  deckRouter.post('/', (req, res, next) => {
+  deckRouter.post('/', async (req, res) => {
     const { name, hash, cover, commander } = req.body;
 
-    dbase
-      .collection(COLLECTION_NAME)
-      .insertOne({ name, hash, cover, commander, cards: [] }, (err, result) => {
-        if (err) {
-          throw err;
-        }
+    try {
+      const result = await dbase
+        .collection(COLLECTION_NAME)
+        .insertOne({ name, hash, cover, commander, cards: [] });
 
-        res.send({ deck: { name: result.ops[0].name, uuid: result.ops[0]._id } });
-      });
+      res.send({ deck: { name, uuid: result.insertedId } });
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+    }
   });
 
-  deckRouter.put('/', (req, res, next) => {
-    const { uuid, ...deck } = req.body.deck;
+  deckRouter.put('/', async (req, res) => {
+    try {
+      const { uuid, ...deck } = req.body.deck;
 
-    dbase
-      .collection(COLLECTION_NAME)
-      .replaceOne({ _id: ObjectID(uuid) }, { ...deck }, { upsert: true }, (err, result) => {
-        if (err) {
-          throw err;
-        }
+      await dbase
+        .collection(COLLECTION_NAME)
+        .replaceOne({ _id: new ObjectId(uuid) }, { ...deck }, { upsert: true });
 
-        res.send({ deck: { ...deck, uuid } });
-      });
+      res.send({ deck: { ...deck, uuid } });
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+    }
   });
 
   return deckRouter;

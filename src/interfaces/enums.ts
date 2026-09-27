@@ -1,12 +1,14 @@
-export function mapEnum(enumerable: any, fn: Function): any[] {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function mapEnum(enumerable: any, fn: (member: any) => any): any[] {
   // get all the members of the enum
-  const enumMembers: any[] = Object.keys(enumerable).map(key => enumerable[key]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const enumMembers: any[] = Object.keys(enumerable).map((key) => enumerable[key]);
 
   // // we are only interested in the numeric identifiers as these represent the values
   // let enumValues: number[] = enumMembers.filter(v => typeof v === 'number');
 
   // now map through the enum values
-  return enumMembers.map(m => fn(m));
+  return enumMembers.map((m) => fn(m));
 }
 
 export enum CardMainType {
@@ -17,14 +19,14 @@ export enum CardMainType {
   Artifact = 'Artifact',
   Land = 'Land',
   Planeswalker = 'Planeswalker',
-  Emblem = 'Emblem'
+  Emblem = 'Emblem',
 }
 
 export enum RarityType {
   Common = 'Common',
   Uncommon = 'Uncommon',
   Rare = 'Rare',
-  MythicRare = 'Mythic Rare'
+  MythicRare = 'Mythic Rare',
 }
 
 export enum ColorType {
@@ -36,7 +38,7 @@ export enum ColorType {
   Colorless = 'colorless',
   Gold = 'gold',
   Land = 'land',
-  Planeswalker = 'planeswalker'
+  Planeswalker = 'planeswalker',
 }
 
 export enum Creators {
@@ -55,11 +57,11 @@ export enum Creators {
   Soul = 'Goomy our Soul',
   Truth = 'Goomy our Truth',
   NobleTwo = 'NobleTwo',
-  Kant = 'Kantiger als Kant'
+  Kant = 'Kantiger als Kant',
 }
 
 export enum CardState {
   Draft = 'Draft',
   Rate = 'Rate',
-  Approved = 'Approved'
+  Approved = 'Approved',
 }

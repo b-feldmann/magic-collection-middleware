@@ -1,80 +1,74 @@
-import { ObjectID } from 'mongodb';
+import { ObjectId } from 'mongodb';
 
 import express from 'express';
-import moment from 'moment';
 
 const annotationRouter = express.Router();
 
 const COLLECTION_ANNOTATIONS = 'annotations';
 
-const idToUuid = mechanic => {
+const idToUuid = (mechanic) => {
   const { _id, ...rest } = mechanic;
   return { ...rest, uuid: _id };
 };
 
-const createAnnotationsRouter = dbase => {
-  annotationRouter.get('/', function(req, res) {
+const createAnnotationsRouter = (dbase) => {
+  annotationRouter.get('/', async (req, res) => {
     if (req.query.accessKey !== process.env.ACCESS_KEY) {
       res.sendStatus(401);
       return;
     }
 
-    dbase
-      .collection(COLLECTION_ANNOTATIONS)
-      .find()
-      .toArray((err, results) => {
-        if (err) {
-          throw err;
-        }
+    try {
+      const results = await dbase.collection(COLLECTION_ANNOTATIONS).find().toArray();
 
-        res.send({ annotations: results.map(annotation => idToUuid(annotation)) });
-      });
+      res.send({ annotations: results.map((annotation) => idToUuid(annotation)) });
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+    }
   });
 
-  annotationRouter.post('/', (req, res, next) => {
+  annotationRouter.post('/', async (req, res) => {
     if (req.body.accessKey !== process.env.ACCESS_KEY) {
       res.sendStatus(401);
       return;
     }
 
-    const annotation = {
-      content: req.body.content,
-      author: req.body.author,
-      cardReference: req.body.cardReference,
-      datetime: moment().valueOf(),
-      edited: false
-    };
+    try {
+      const annotation = {
+        content: req.body.content,
+        author: req.body.author,
+        cardReference: req.body.cardReference,
+        datetime: Date.now(),
+        edited: false,
+      };
 
-    dbase.collection(COLLECTION_ANNOTATIONS).insertOne(annotation, (err, result) => {
-      if (err) {
-        throw err;
-      }
-      res.send({ annotation: idToUuid(result.ops[0]) });
-    });
+      const result = await dbase.collection(COLLECTION_ANNOTATIONS).insertOne(annotation);
+      res.send({ annotation: { ...annotation, uuid: result.insertedId } });
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+    }
   });
 
-  annotationRouter.put('/', (req, res, next) => {
+  annotationRouter.put('/', async (req, res) => {
     if (req.body.accessKey !== process.env.ACCESS_KEY) {
       res.sendStatus(401);
       return;
     }
 
-    const { uuid, ...annotation } = req.body.annotation;
+    try {
+      const { uuid, ...annotation } = req.body.annotation;
 
-    dbase
-      .collection(COLLECTION_ANNOTATIONS)
-      .replaceOne(
-        { _id: ObjectID(uuid) },
-        { ...annotation, edited: true },
-        { upsert: true },
-        (err, result) => {
-          if (err) {
-            throw err;
-          }
+      await dbase
+        .collection(COLLECTION_ANNOTATIONS)
+        .replaceOne({ _id: new ObjectId(uuid) }, { ...annotation, edited: true }, { upsert: true });
 
-          res.send({ annotation: { ...annotation, uuid, edited: true } });
-        }
-      );
+      res.send({ annotation: { ...annotation, uuid, edited: true } });
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+    }
   });
 
   return annotationRouter;

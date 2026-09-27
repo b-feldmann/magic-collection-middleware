@@ -9,8 +9,7 @@ module.exports = {
     "airbnb",
     "plugin:@typescript-eslint/recommended",
     "plugin:import/typescript",
-    "plugin:prettier/recommended",
-    "prettier/@typescript-eslint"
+    "plugin:prettier/recommended"
   ],
   rules: {
     /**
@@ -27,6 +26,19 @@ module.exports = {
      */
     "import/export": "off",
     "import/prefer-default-export": "off", // Allow single Named-export
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        ts: "never"
+      }
+    ],
+    "no-underscore-dangle": [
+      "error",
+      {
+        allow: ["_id"]
+      }
+    ],
     "no-unused-expressions": [
       "warn",
       {

@@ -1,4 +1,4 @@
-import * as supertest from 'supertest';
+import supertest from 'supertest';
 import app from '../src/index';
 
 describe('app', () => {
@@ -6,7 +6,7 @@ describe('app', () => {
   beforeEach(() => {
     request = supertest(app);
   });
-  it('should return a successful response for GET /', done => {
+  it('should return a successful response for GET /', (done) => {
     request.get('/').expect(200, done);
   });
 });
