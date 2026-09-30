@@ -87,6 +87,30 @@ const createCardRouter = (dbase) => {
     }
   });
 
+  cardRouter.delete('/:uuid', async (req, res) => {
+    if (req.query.accessKey !== process.env.ACCESS_KEY) {
+      res.sendStatus(401);
+      return;
+    }
+
+    try {
+      const { uuid } = req.params;
+      const result = await dbase
+        .collection(COLLECTION_CARDS)
+        .deleteOne({ _id: new ObjectId(uuid) });
+
+      if (result.deletedCount === 0) {
+        res.sendStatus(404);
+        return;
+      }
+
+      res.send({ uuid });
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+    }
+  });
+
   return cardRouter;
 };
 
