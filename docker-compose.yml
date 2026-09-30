@@ -1,12 +1,10 @@
 services:
-  mongodb:
-    image: mongo:8
-    container_name: magic-collection-mongodb
+  middleware:
+    build: .
+    container_name: magic-collection-middleware
     restart: unless-stopped
     ports:
-      - '27017:27017'
-    volumes:
-      - mongodb-data:/data/db
+      - '8080:8080'
+    env_file:
+      - .env
 
-volumes:
-  mongodb-data:

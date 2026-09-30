@@ -14,6 +14,9 @@ module.exports = {
     extensions: ['.ts', '.js']
   },
   externals: [nodeExternals()],
+  optimization: {
+    nodeEnv: false
+  },
   module: {
     rules: [
       {
