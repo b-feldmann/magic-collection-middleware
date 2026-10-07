@@ -19,7 +19,17 @@ const { PORT = 8080 } = process.env;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(
+  express.static(path.join(__dirname, 'public'), {
+    maxAge: '1y',
+    immutable: true,
+    setHeaders(res, filePath) {
+      if (filePath.endsWith('index.html')) {
+        res.setHeader('Cache-Control', 'no-cache');
+      }
+    },
+  }),
+);
 
 const databaseName = process.env.NODE_ENV === 'development' ? 'mtg-funset-test' : 'mtg-funset';
 const databaseNameDeckBuilder = 'deck-builder';
