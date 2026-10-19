@@ -11,6 +11,7 @@ import createAnnotationsRouter from './routes/annotations';
 import createUserRouter from './routes/user';
 import createImagesRouter from './routes/images';
 import createDeckRouter from './routes/decks';
+import createTagsRouter from './routes/tags';
 
 dotenv.config({ quiet: true });
 const app = express();
@@ -55,6 +56,7 @@ if (require.main === module) {
 
       app.use('/cards', createCardRouter(dbase));
       app.use('/mechanics', createMechanicRouter(dbase));
+      app.use('/tags', createTagsRouter(dbase));
       app.use('/annotations', createAnnotationsRouter(dbase));
       app.use('/user', createUserRouter(dbase));
       app.use('/images', createImagesRouter(dbase));
