@@ -10,6 +10,8 @@ const idToUuid = (user) => {
   return { ...rest, uuid: _id };
 };
 
+const SAGA_EDITORS = ['steps', 'text'];
+
 const isStringArray = (value) =>
   Array.isArray(value) && value.every((item) => typeof item === 'string');
 
@@ -77,13 +79,16 @@ const createUserRouter = (dbase) => {
     }
 
     const { uuid } = req.params;
-    const { seenCards, seenComments, lastSeenVersion } = req.body;
+    const { seenCards, seenComments, lastSeenVersion, sagaEditor } = req.body;
     if (
       !ObjectId.isValid(uuid) ||
-      (seenCards === undefined && seenComments === undefined && lastSeenVersion === undefined) ||
+      [seenCards, seenComments, lastSeenVersion, sagaEditor].every(
+        (value) => value === undefined,
+      ) ||
       (seenCards !== undefined && !isStringArray(seenCards)) ||
       (seenComments !== undefined && !isStringArray(seenComments)) ||
-      (lastSeenVersion !== undefined && !Number.isInteger(lastSeenVersion))
+      (lastSeenVersion !== undefined && !Number.isInteger(lastSeenVersion)) ||
+      (sagaEditor !== undefined && !SAGA_EDITORS.includes(sagaEditor))
     ) {
       res.sendStatus(400);
       return;
@@ -100,6 +105,7 @@ const createUserRouter = (dbase) => {
         {
           ...(Object.keys(added).length ? { $addToSet: added } : {}),
           ...(lastSeenVersion !== undefined ? { $max: { lastSeenVersion } } : {}),
+          ...(sagaEditor !== undefined ? { $set: { sagaEditor } } : {}),
         },
         { returnDocument: 'after' },
       );
