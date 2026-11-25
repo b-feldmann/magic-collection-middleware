@@ -79,16 +79,17 @@ const createUserRouter = (dbase) => {
     }
 
     const { uuid } = req.params;
-    const { seenCards, seenComments, lastSeenVersion, sagaEditor } = req.body;
+    const { seenCards, seenComments, lastSeenVersion, sagaEditor, trollMode } = req.body;
     if (
       !ObjectId.isValid(uuid) ||
-      [seenCards, seenComments, lastSeenVersion, sagaEditor].every(
+      [seenCards, seenComments, lastSeenVersion, sagaEditor, trollMode].every(
         (value) => value === undefined,
       ) ||
       (seenCards !== undefined && !isStringArray(seenCards)) ||
       (seenComments !== undefined && !isStringArray(seenComments)) ||
       (lastSeenVersion !== undefined && !Number.isInteger(lastSeenVersion)) ||
-      (sagaEditor !== undefined && !SAGA_EDITORS.includes(sagaEditor))
+      (sagaEditor !== undefined && !SAGA_EDITORS.includes(sagaEditor)) ||
+      (trollMode !== undefined && typeof trollMode !== 'boolean')
     ) {
       res.sendStatus(400);
       return;
@@ -99,13 +100,18 @@ const createUserRouter = (dbase) => {
       ...(seenComments ? { seenComments: { $each: seenComments } } : {}),
     };
 
+    const replaced = {
+      ...(sagaEditor !== undefined ? { sagaEditor } : {}),
+      ...(trollMode !== undefined ? { trollMode } : {}),
+    };
+
     try {
       const user = await dbase.collection(COLLECTION_NAME).findOneAndUpdate(
         { _id: new ObjectId(uuid) },
         {
           ...(Object.keys(added).length ? { $addToSet: added } : {}),
           ...(lastSeenVersion !== undefined ? { $max: { lastSeenVersion } } : {}),
-          ...(sagaEditor !== undefined ? { $set: { sagaEditor } } : {}),
+          ...(Object.keys(replaced).length ? { $set: replaced } : {}),
         },
         { returnDocument: 'after' },
       );

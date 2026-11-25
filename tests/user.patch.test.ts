@@ -81,6 +81,12 @@ describe('user partial updates', () => {
     expect(response.body.user).toMatchObject({ sagaEditor: 'steps', lastSeenVersion: 5 });
   });
 
+  it('replaces whether troll mode is on, next to the Saga editor', async () => {
+    await patch({ trollMode: true, sagaEditor: 'text' }).expect(200);
+    const response = await patch({ trollMode: false }).expect(200);
+    expect(response.body.user).toMatchObject({ trollMode: false, sagaEditor: 'text' });
+  });
+
   it('rejects a wrong access key', async () => {
     await patch({ accessKey: 'wrong', seenCards: ['card-b'] }).expect(401);
     expect(findOneAndUpdate).not.toHaveBeenCalled();
@@ -91,6 +97,7 @@ describe('user partial updates', () => {
     ['non-array seen comments', { seenComments: 'comment-b' }],
     ['non-string seen cards', { seenCards: [{ $gt: '' }] }],
     ['a non-integer version', { lastSeenVersion: '7' }],
+    ['a non-boolean troll mode', { trollMode: 'on' }],
     ['an unknown Saga editor', { sagaEditor: { $gt: '' } }],
   ])('rejects %s', async (_name, body) => {
     await patch(body).expect(400);
